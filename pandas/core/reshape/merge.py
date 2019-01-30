@@ -493,7 +493,7 @@ class _MergeOperation(object):
         
         if self.how == 'anti':
             self.how = 'left'
-            left['anti merge helper column'] = 1
+            self.left['anti merge helper column'] = 1
             self.suffixes = ('', '_y')
 
         self.left_index = left_index
@@ -576,8 +576,8 @@ class _MergeOperation(object):
 
         if self.orig_how == 'anti':
             anti_predicate = result['anti merge helper column'].isnull()
-            result[anti_predicate].drop('anti merge helper column',
-                                        axis=1, inplace=True)
+            self.left.drop('anti merge helper column', axis=1, inplace=True)
+            result = result[self.left.columns.tolist()]
             
         return result
 
