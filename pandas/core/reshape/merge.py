@@ -480,7 +480,7 @@ class _MergeOperation(object):
         right = validate_operand(right)
         self.left = self.orig_left = left
         self.right = self.orig_right = right
-        self.how = how
+        self.how = self.orig_how = how
         self.axis = axis
 
         self.on = com.maybe_make_list(on)
@@ -490,6 +490,11 @@ class _MergeOperation(object):
         self.copy = copy
         self.suffixes = suffixes
         self.sort = sort
+        
+        if self.how == 'anti':
+            self.how = 'left'
+            left['anti merge helper column'] = 1
+            self.suffixes = ('', '_y')
 
         self.left_index = left_index
         self.right_index = right_index
@@ -569,6 +574,11 @@ class _MergeOperation(object):
 
         self._maybe_restore_index_levels(result)
 
+        if self.orig_how == 'anti':
+            anti_predicate = result['anti merge helper column'].isnull()
+            result[anti_predicate].drop('anti merge helper column',
+                                        axis=1, inplace=True)
+            
         return result
 
     def _indicator_pre_merge(self, left, right):
